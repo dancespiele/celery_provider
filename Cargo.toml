@@ -1,0 +1,18 @@
+[package]
+name = "celery_example_worker"
+version = "0.1.0"
+authors = ["spieljs <spieljs@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+celery = "0.3"
+tokio = {version = "0.2.13", features = ["full"]}
+serde = "1.0"
+serde_json = "1.0"
+structopt = "0.3"
+anyhow = "1.0"
+warp = "0.2"
+sled = "0.34"
+dotenv = "0.15"
