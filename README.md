@@ -17,7 +17,7 @@ AMPQ_ADDR=[YOUR AMPQ URL]
 
 4. Execute `cargo run`
 
-5. Run the [Consumer](https://github.com/dancespiele/celery_provider) example to see all the complete flow
+5. Run the [Consumer example](https://github.com/dancespiele/celery_consumer) example to see all the complete flow
 
 6. Execute this curl
 
