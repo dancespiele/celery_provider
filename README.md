@@ -1,4 +1,4 @@
-# Celery consumer
+# Celery Provider
 
 This is an example of provider with [Rust Celery](https://rusty-celery.github.io/) and [Warp](https://github.com/seanmonstar/warp) which will get the complete result task from [Sled](https://sled.rs/) database.
 

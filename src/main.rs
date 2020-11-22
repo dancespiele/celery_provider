@@ -1,16 +1,16 @@
 extern crate celery;
 extern crate structopt;
-use celery::{TaskResult, Celery, broker::AMQPBroker};
-use celery::error::{CeleryError};
-use std::net::SocketAddr;
-use warp::{filters::BoxedFilter, Filter};
-use warp::{reply, Rejection, Reply, reject};
-use std::{error::Error};
-use sled::{Db, IVec, Error as DbError};
-use std::str;
+use celery::error::CeleryError;
+use celery::{broker::AMQPBroker, Celery, TaskResult};
 use dotenv::dotenv;
+use sled::{Db, Error as DbError, IVec};
 use std::env;
+use std::error::Error;
+use std::net::SocketAddr;
+use std::str;
 use tokio::time::{delay_for, Duration};
+use warp::{filters::BoxedFilter, Filter};
+use warp::{reject, reply, Rejection, Reply};
 
 #[celery::task]
 fn send_text(text: String) -> TaskResult<String> {
@@ -28,7 +28,7 @@ fn init_my_app() -> Result<BoxedFilter<(&'static Celery<AMQPBroker>,)>, Box<dyn 
         ]
     );
 
-    Ok(warp::any().map(move || my_app.clone()).boxed())
+    Ok(warp::any().map(move || my_app).boxed())
 }
 
 pub fn init_tree() -> Result<Db, DbError> {
@@ -39,8 +39,11 @@ pub fn init_tree() -> Result<Db, DbError> {
 async fn send_hello(my_app: &'static Celery<AMQPBroker>) -> Result<impl Reply, Rejection> {
     let response: IVec;
     let mut index = 0;
-    let id_message =             my_app.send_task(send_text::new("hello consumer".to_string())).await
-    .or_else(|_| Err(CeleryError::TaskRegistrationError(String::from("unknown task")))).unwrap();
+    let id_message = my_app
+        .send_task(send_text::new("hello consumer".to_string()))
+        .await
+        .map_err(|_| CeleryError::TaskRegistrationError(String::from("unknown task")))
+        .unwrap();
 
     delay_for(Duration::from_millis(100)).await;
 
@@ -59,7 +62,7 @@ async fn send_hello(my_app: &'static Celery<AMQPBroker>) -> Result<impl Reply, R
         }
 
         index += 1;
-        
+
         if index > 10 {
             return Err(reject::not_found());
         }
@@ -80,7 +83,6 @@ fn hello_filter(
         .and(my_app)
         .and_then(send_hello)
 }
-
 
 #[tokio::main]
 async fn main() {
